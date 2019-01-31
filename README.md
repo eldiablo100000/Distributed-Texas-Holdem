@@ -1,18 +1,19 @@
 # Distributed-Texas-Holdem
-Il progetto presentato si chiama “Distributed Texas Hold’em Poker”, e consiste nella progettazione ed implementazione di un tavolo da poker, specialità Texas Hold’em, online (nella propria LAN) e distribuito, sfruttando la tecnologia Java RMI (Remote Method Invocation).
+The project presented is called "Distributed Texas Hold'em Poker", and consists in the design and implementation of a poker game, Texas Hold'em specialty, online (in LAN) and distributed, using the Java RMI (Remote Method Invocation) technology.
 
-Con tale progetto si vuole fornire un’applicazione che rispecchi il più fedelmente possibile il gioco del poker, che essa sia semplice, robusta ai guasti e possa essere di aiuto a chi ha il problema e/o l’esigenza diorganizzare una partita possedendo solamente una rete LAN (Ethernet o Wi-Fi) e dei computer.
+With this project we want to provide an application that reflects as faithfully as possible the game of poker, that it is simple, robust to breakdowns and can be of help to those who have the problem and / or the need to organize a game having only one LAN (Ethernet or Wi-Fi) and computers.
 
-Tale progetto è stato realizzato per l'esame di Sistemi Distribuiti presso l'Università di Bologna (Informatica Magistrale).
+This project was carried out for the examination of Distributed Systems at the University of Bologna (Magistral Computer Science).
 
-# Compilazione
+# Compilation
 ```
 python compile.py
 ```
-# Esecuzione
-## Server:
+# Execution
+## Server for players registration to the game:
 ```
-java ServerForStart numUtentiDa2a8
+java ServerForStart #players
+#players = 2-8
 ```
 ## Poker:
 ```
