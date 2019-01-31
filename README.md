@@ -2,22 +2,21 @@
 
 # Compilation
 ## To compile all:
-'''
+```
 python compile.py
-'''
-
-#Launch
+```
+# Launch
 ## Server:
-'''
+```
     java ServerForStart numUtentiDa2a8
-'''
+```
 ## Poker:
     java TexasHoldem [-d] IPServer
     [-d] option is for debug mode
 
 Enjoy ;)
 
-#Authors
+# Authors
 Fulvio Marcelli
 
 Gianmarco Santini
