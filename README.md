@@ -15,9 +15,10 @@ python compile.py
 java ServerForStart numUtentiDa2a8
 ```
 ## Poker:
+```
  java TexasHoldem [-d] IPServer
  [-d] option is for debug mode
-
+```
 Enjoy ;)
 
 # Authors
