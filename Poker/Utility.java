@@ -4,122 +4,146 @@ import java.rmi.registry.*;
 import java.util.concurrent.*;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.net.Socket;
-import java.io.IOException;
-import java.lang.reflect.Method;
 
 
 public class Utility {
 
 	public static String IpGiocatoreSeguente;
 	public static int MyOldConnectionID;
-	public static boolean risPing = false;
+
 
 	/*-----------------------------------------FAULT TOLLERANCE-----------------------------------------*/
 
-
-	public static boolean ping(String server,int port) {
-
-		/*System.out.println("ping: " +server + ", porta: " + port);				//con i socket 
-	    try (Socket ignored = new Socket(server, port)) {
-	       	System.out.println("up");
-		 return false;
-	    } 
-	    catch (IOException ignored) {
-	       	System.out.println("down");
-        	return true;
-    	}*/
-
-    	boolean ris;															// con rmi
-    	try{
-			TexasGame ClientRMI = (TexasGame) 
-			java.rmi.Naming.lookup("rmi://"+server +"/Game");
-			Class<?> c = Class.forName("TexasGame");
-			Method method =c.getDeclaredMethod("sonoVivo"+ServerRMI.MyConnectionID);
-			method.invoke(ClientRMI);
-			ris = false;
-		}
-		catch(Exception exce){
-			ris = true;
-		}
-
-		return ris;
-	}
-
-
-
-
-	TimerTask controllaGiocatoreSucessivo = new TimerTask(){													/* funzione che pinga tutti i giocatori e se uno e uscito dal gioco lo rimuove*/
+	TimerTask controllaGiocatoreSucessivo = new TimerTask(){													/* funzione che pinga il giocatore sucessivo ogni 0.5 secondi e se e uscito dal gioco lo toglie e avvisa gli altri giocatori */
     @Override
     public void run() {
+	    try{
+	    	IpGiocatoreSeguente = ServerRMI.IpGiocatori.get(ServerRMI.MyConnectionID % ServerRMI.utentiTavolo);
+			TexasGame ClientRMI = (TexasGame)
+			java.rmi.Naming.lookup("rmi://"+IpGiocatoreSeguente+"/Game"); 
+			ClientRMI.sonoVivo();
+			}
 
-    	for(int i =0; i < ServerRMI.utentiTavolo; i++){
-    		risPing = ping(ServerRMI.IpGiocatori.get(i),1099);
-    		if(risPing == true) faultTolerance(i+1);
-    		}
-    	}
-  	};
-  	
-
-
-
-
-
-  	public void faultTolerance(int id){
+		catch(Exception e) {
 
 			if (ServerRMI.Debug) System.out.println("il giocatore "+ (( ServerRMI.MyConnectionID % ServerRMI.utentiTavolo)+1) + " e uscito dal gioco");
-			
+			if ( ServerRMI.Sconfitto) System.exit(1);
+			if (ServerRMI.GiocatoreCorrente == ServerRMI.MyConnectionID +1){
+				System.out.println(" reimpostaStato");
+				for (String x : ServerRMI.IpGiocatori){ //	for (int i =0; i < ServerRMI.utentiTavolo; i++){//
+					if (!x.equals(ServerRMI.MyIp)){	//if(!ServerRMI.IpGiocatori.get(i).equals(ServerRMI.MyIp)){ //
+						try{
+							TexasGame ClientRMI = (TexasGame) 
+							java.rmi.Naming.lookup("rmi://"+ x +"/Game"); //java.rmi.Naming.lookup("rmi://"+ServerRMI.IpGiocatori.get((ServerRMI.MyConnectionID+i) % (ServerRMI.utentiTavolo-1))+"/Game"); //
+							ClientRMI.reimpostaStato(ServerRMI.GiocatoreCorrente, ServerRMI.OperazioneEseguita, ServerRMI.stack, ServerRMI.puntate, ServerRMI.puntateMano, ServerRMI.piatti, ServerRMI.AllinGiocatori, ServerRMI.ultimoGiocatore, ServerRMI.piatto, ServerRMI.Gui.canvas.flop1, ServerRMI.Gui.canvas.flop2, ServerRMI.Gui.canvas.flop3, ServerRMI.Gui.canvas.cartaTurn, ServerRMI.Gui.canvas.cartaRiver, ServerRMI.Gui.canvas.carteGiocatori);
+
+						}
+
+						catch(Exception exc) { 
+							System.out.println("eccezione reimpostaStato");
+  
+					 	}
+					}
+				}
+			}
 
 			MyOldConnectionID = ServerRMI.MyConnectionID;
 			int OldutentiTavolo = ServerRMI.utentiTavolo;
 			try{
 				TexasGame ClientRMI = (TexasGame) 
 				java.rmi.Naming.lookup("rmi://"+ServerRMI.MyIp +"/Game");
-				ClientRMI.terminaPartita(id);
+				ClientRMI.terminaPartita( ((ServerRMI.MyConnectionID % ServerRMI.utentiTavolo) +1));
 			}
 			catch(Exception exce){
+				System.out.println("eccezione terminaPartita su di me");
 
 			}
-			
+			//boolean tryComplete = false;
+			//while(tryComplete == false){
 
-
-
-
-				if ( ServerRMI.GiocatoreCorrente == ServerRMI.MyConnectionID+1 || ServerRMI.GiocatoreCorrente == ((ServerRMI.MyConnectionID +1) % ServerRMI.utentiTavolo)){
-
-					int x = contaUtentiAttivi();							
-
-					if (ServerRMI.nUtentiAttivi == 0){								/*caso in cui gli unici utenti in gioco sono in fold*/
-						ServerRMI.Gui.canvas.Animation = false;
+				for (String x : ServerRMI.IpGiocatori){ //for (int i =0; i < ServerRMI.utentiTavolo; i++){
+					if (!x.equals(ServerRMI.MyIp)){		//if(!ServerRMI.IpGiocatori.get(i).equals(ServerRMI.MyIp)){ //
 						try{
 							TexasGame ClientRMI = (TexasGame) 
-							java.rmi.Naming.lookup("rmi://"+ServerRMI.IpGiocatori.get(ServerRMI.ultimoGiocatore %ServerRMI.utentiTavolo) +"/Game");
-							ClientRMI.terminaMano(ServerRMI.vincitori, ServerRMI.CarteValutazione);
-						}
-						catch(Exception e0){
+							java.rmi.Naming.lookup("rmi://"+ x +"/Game"); //java.rmi.Naming.lookup("rmi://"+ServerRMI.IpGiocatori.get((ServerRMI.MyConnectionID+i)% (ServerRMI.utentiTavolo-1))+"/Game"); //
+							ClientRMI.terminaPartita((MyOldConnectionID % OldutentiTavolo) +1);
 
 						}
+				
+						catch(Exception exc) { 
+							System.out.println("eccezione terminaPartita sugli altri"+ ServerRMI.MyConnectionID + "  "+ ServerRMI.utentiTavolo);
+							exc.printStackTrace();
+					 	}
+						//tryComplete = true;
+					//}
+				}
+			}
+		
+			int x = contaUtentiAttivi();				/*caso in cui gli unici utenti in gioco sono in fold*/
+
+			System.out.println("!!!!!!!!" +ServerRMI.nUtentiAttivi);
+
+			if (ServerRMI.nUtentiAttivi == 0){
+				ServerRMI.Gui.canvas.Animation = false;
+				try{
+					TexasGame ClientRMI = (TexasGame) 
+					java.rmi.Naming.lookup("rmi://"+ServerRMI.IpGiocatori.get(ServerRMI.ultimoGiocatore %ServerRMI.utentiTavolo) +"/Game");
+					ClientRMI.terminaMano(ServerRMI.vincitori, ServerRMI.CarteValutazione);
+				}
+				catch(Exception e0){
+
+				}
+				//System.out.println("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"+ ServerRMI.IpGiocatori.get(ServerRMI.ultimoGiocatore %ServerRMI.utentiTavolo));
+
+			}
+
+
+
+			if(ServerRMI.nUtentiAttivi == 1){
+				if (ServerRMI.Debug) System.out.println("UN SOLO UTENTE ATTIVO");
+
+				try{
+					int i = ServerRMI.MyConnectionID % ServerRMI.utentiTavolo;
+	            	while (ServerRMI.UtentiAttivi.get(i) == null) i = (i+1) % ServerRMI.utentiTavolo; 
+	              	TexasGame ClientRMI = (TexasGame)
+	              	java.rmi.Naming.lookup("rmi://" + ServerRMI.UtentiAttivi.get(i)  +"/Game");
+	              	ServerRMI.vincitori.add(i+1);
+					ClientRMI.terminaMano(ServerRMI.vincitori, ServerRMI.CarteValutazione);
+				}
+				catch(Exception e1) {
+
+				} 
+			}
+
+			else{
+				
+		//int utAttivi = contaUtentiAttivi();
+              /*	int utAllin = contaUtentiAllin();
+
+             	if ((ServerRMI.nUtentiAttivi == utAllin || ServerRMI.nUtentiAttivi == utAllin+1)) {
+             		try{
+						int i = ServerRMI.MyConnectionID % ServerRMI.utentiTavolo;
+		            	while (ServerRMI.UtentiAttivi.get(i) == null) i = (i+1) % ServerRMI.utentiTavolo; 
+		              	TexasGame ClientRMI = (TexasGame)
+		              	java.rmi.Naming.lookup("rmi://" + ServerRMI.UtentiAttivi.get(i)  +"/Game");
+						ClientRMI.mostraC(0);
+					}
+					catch(Exception e1) {
 
 					}
+              	}*/
 
-
-
-					if(ServerRMI.nUtentiAttivi == 1){								/* caso un solo giocatore rimasto attivo */
-						if (ServerRMI.Debug) System.out.println("UN SOLO UTENTE ATTIVO");
-
-						try{
-							int i = ServerRMI.MyConnectionID % ServerRMI.utentiTavolo;
-			            	while (ServerRMI.UtentiAttivi.get(i) == null) i = (i+1) % ServerRMI.utentiTavolo; 
-			              	TexasGame ClientRMI = (TexasGame)
-			              	java.rmi.Naming.lookup("rmi://" + ServerRMI.UtentiAttivi.get(i)  +"/Game");
-			              	ServerRMI.vincitori.add(i+1);
-							ClientRMI.terminaMano(ServerRMI.vincitori, ServerRMI.CarteValutazione);
-						}
-						catch(Exception e1) {
-
-						} 
-					}
 					
+
+
+
+				System.out.println("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"+ServerRMI.GiocatoreCorrente+ ServerRMI.MyConnectionID+((ServerRMI.MyConnectionID +1) % ServerRMI.utentiTavolo)+ ServerRMI.OperazioneEseguita);
+
+
+				if ( (ServerRMI.GiocatoreCorrente == ServerRMI.MyConnectionID+1 || ServerRMI.GiocatoreCorrente == ((ServerRMI.MyConnectionID +1) % ServerRMI.utentiTavolo) || (ServerRMI.GiocatoreCorrente == ServerRMI.MyConnectionID && ServerRMI.OperazioneEseguita ==0) ||/* (ServerRMI.MyConnectionID == ServerRMI.GiocatoreCorrente && ServerRMI.attivaBottoni == false && ServerRMI.OperazioneEseguita <7 && ServerRMI.PossoGiocare == true)||*/ ServerRMI.GiocatoreCorrente == 0) && ServerRMI.nUtentiAttivi>1){			
+					
+						
+					System.out.println("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"+ ServerRMI.nUtentiAttivi);
 
 					if (ServerRMI.GiocatoreCorrente > ServerRMI.utentiTavolo) ServerRMI.GiocatoreCorrente = ServerRMI.utentiTavolo;
 
@@ -349,8 +373,10 @@ public class Utility {
 						}
 					}
 				}
-			
-		
+			}
+		}
+  	};
+
 /*--------------------------------------------------- FINE FAULT TOLLERANCE--------------------------------------------*/
 
 

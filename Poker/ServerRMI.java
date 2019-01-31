@@ -1202,6 +1202,14 @@ extends java.rmi.server.UnicastRemoteObject
 		Sconfitto = true;
 	}
 
+
+
+	public void sonoVivo(){						/* per controllare se sono ancora in gioco */
+
+	}
+
+
+
 	/* reimposto il mio stato nel caso in cui sia avvenuto il crash di un giocatore */
 	public void reimpostaStato(int giocatoreCorr, int opEs, int [] stackG, int [] puntateG, int [] puntateManoG, int [] piattiG, int [] AllinGiocatoriG, int ultimoG, int Piatto, String Flop1, String Flop2, String Flop3, String CartaTurn, String CartaRiver, ArrayList<ArrayList<String>> CarteGiocatori){
 
@@ -1229,18 +1237,4 @@ extends java.rmi.server.UnicastRemoteObject
 		Gui.canvas.carteGiocatori = CarteGiocatori;
 
 	}
-
-
-
-
-	public void sonoVivo1(){}					/*funzioni per indicare agli altri giocatori che sono ancora in gioco, ogni giocatore chiama quella con il suo id */
-	public void sonoVivo2(){}
-	public void sonoVivo3(){}
-	public void sonoVivo4(){}
-	public void sonoVivo5(){}
-	public void sonoVivo6(){}
-	public void sonoVivo7(){}
-	public void sonoVivo8(){}
-
-
 }//fine classe

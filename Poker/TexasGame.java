@@ -71,28 +71,7 @@ void mostraC(int i)
 void mostraCarte(ArrayList <Integer> Carte, int id,int i)
 			throws java.rmi.RemoteException;
 
-void sonoVivo1()
-			throws java.rmi.RemoteException;
-
-void sonoVivo2()
-			throws java.rmi.RemoteException;
-
-void sonoVivo3()
-			throws java.rmi.RemoteException;
-
-void sonoVivo4()
-			throws java.rmi.RemoteException;
-
-void sonoVivo5()
-			throws java.rmi.RemoteException;
-
-void sonoVivo6()
-			throws java.rmi.RemoteException;
-
-void sonoVivo7()
-			throws java.rmi.RemoteException;
-
-void sonoVivo8()
+void sonoVivo()
 			throws java.rmi.RemoteException;
 
 void MioTurno(int id, int op)
